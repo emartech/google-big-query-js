@@ -3,6 +3,7 @@
 const API = require('./');
 const BigQuery = require('./big-query');
 const FileToTable = require('./file-to-table');
+const QueryToFile = require('./query-to-file');
 const QueryToStream = require('./query-to-stream');
 const QueryToTable = require('./query-to-table');
 const QueryToView = require('./query-to-view');
@@ -20,6 +21,15 @@ describe('API', function() {
 
     it('is a FileToTable', function() {
       expect(API.FileToTable).to.be.eql(FileToTable);
+    });
+
+  });
+
+
+  describe('#QueryToFile', function() {
+
+    it('is a QueryToFile', function() {
+      expect(API.QueryToFile).to.be.eql(QueryToFile);
     });
 
   });

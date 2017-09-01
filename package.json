@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "config": "^1.26.2",
-    "google-cloud": "^0.56.0"
+    "google-cloud": "^0.56.0",
+    "@emartech/google-cloud-storage": "^1.0.0"
   }
 }
