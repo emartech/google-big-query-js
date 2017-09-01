@@ -49,7 +49,7 @@ class BigQuery {
     let [exists] = yield table.exists();
 
     if (!exists) {
-      yield table.create({ schema: schema });
+      yield table.create({ schema });
     }
   }
 
