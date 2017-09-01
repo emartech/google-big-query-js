@@ -7,14 +7,18 @@ require('co-mocha');
 const sinon = require('sinon');
 
 const chai = require('chai');
-const sinonChai = require('sinon-chai');
 
-chai.use(sinonChai);
+chai.use(require('sinon-chai'));
+chai.use(require('chai-subset'));
 global.expect = chai.expect;
 global.sinon = sinon;
 
 before(function() {
-  config.util.setModuleDefaults('GoogleCloud', { projectId: 'main_project', dataset: 'main_dataset' });
+  config.util.setModuleDefaults('GoogleCloud', {
+    projectId: 'main_project',
+    dataset: 'main_dataset',
+    maximumBillingTier: 100
+  });
 });
 
 beforeEach(function() {

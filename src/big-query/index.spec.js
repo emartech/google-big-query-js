@@ -22,14 +22,22 @@ describe('BigQuery', function() {
     it('should setup a big query client', function() {
       BigQuery.create();
 
-      expect(GoogleCloud.bigquery).to.calledWithExactly({ projectId: 'main_project', dataset: 'main_dataset' });
+      expect(GoogleCloud.bigquery).to.calledWithExactly({
+        projectId: 'main_project',
+        dataset: 'main_dataset',
+        maximumBillingTier: 100
+      });
     });
 
 
-    it('should setup a big query client (passing the gcloud config untouched, even a dataset was provided', function() {
+    it('should setup a big query client (passing the proper config untouched, even a dataset was provided', function() {
       BigQuery.create('some_other_dataset');
 
-      expect(GoogleCloud.bigquery).to.calledWithExactly({ projectId: 'main_project', dataset: 'main_dataset' });
+      expect(GoogleCloud.bigquery).to.calledWithExactly({
+        projectId: 'main_project',
+        dataset: 'main_dataset',
+        maximumBillingTier: 100
+      });
     });
 
   });
