@@ -6,6 +6,7 @@ const FileToTable = require('./file-to-table');
 const QueryToStream = require('./query-to-stream');
 const QueryToTable = require('./query-to-table');
 const QueryToView = require('./query-to-view');
+const StreamToTable = require('./stream-to-table');
 const TableToFile = require('./table-to-file');
 
 describe('API', function() {
@@ -46,6 +47,15 @@ describe('API', function() {
 
     it('is a QueryToView', function() {
       expect(API.QueryToView).to.be.eql(QueryToView);
+    });
+
+  });
+
+
+  describe('#StreamToTable', function() {
+
+    it('is a StreamToTable', function() {
+      expect(API.StreamToTable).to.be.eql(StreamToTable);
     });
 
   });
