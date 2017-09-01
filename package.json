@@ -1,0 +1,54 @@
+{
+  "name": "@emartech/big-query",
+  "version": "1.0.0",
+  "description": "Helper library to easily use Google BigQuery in NodeJS",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha test-setup.spec.js src --recursive",
+    "code-style": "eslint src/",
+    "validate-commit-msg": "validate-commit-msg",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+  },
+  "release": {
+    "verifyConditions": {
+      "path": "./node_modules/semantic-release/dist/lib/plugin-noop.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emartech/big-query-js.git"
+  },
+  "author": "Emarsys",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/emartech/big-query-js/issues"
+  },
+  "pre-commit": [
+    "code-style",
+    "validate-commit-msg"
+  ],
+  "homepage": "https://github.com/emartech/big-query-js",
+  "peerDependencies": {
+    "config": "^1.26.2",
+    "google-cloud": "^0.56.0"
+  },
+  "devDependencies": {
+    "chai": "4.1.2",
+    "co-mocha": "1.2.0",
+    "eslint": "4.5.0",
+    "eslint-config-emarsys": "4.0.0",
+    "eslint-plugin-no-only-tests": "2.0.0",
+    "eslint-plugin-require-path-exists": "1.1.7",
+    "eslint-plugin-security": "1.4.0",
+    "mocha": "3.5.0",
+    "pre-commit": "1.2.2",
+    "semantic-release": "7.0.2",
+    "sinon": "3.2.1",
+    "sinon-chai": "2.13.0",
+    "validate-commit-message": "3.0.1"
+  },
+  "dependencies": {
+    "config": "^1.26.2",
+    "google-cloud": "^0.56.0"
+  }
+}
