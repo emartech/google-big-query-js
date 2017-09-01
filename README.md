@@ -1,2 +1,2 @@
-# big-query-js
-Helper library to easily use BigQuery in NodeJS
+# google-big-query
+Helper library to easily use Google BigQuery in NodeJS

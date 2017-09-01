@@ -1,5 +1,5 @@
 {
-  "name": "@emartech/big-query",
+  "name": "@emartech/google-big-query",
   "description": "Helper library to easily use Google BigQuery in NodeJS",
   "main": "src/index.js",
   "scripts": {
@@ -15,18 +15,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/emartech/big-query-js.git"
+    "url": "git+https://github.com/emartech/google-big-query-js.git"
   },
   "author": "Emarsys",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/emartech/big-query-js/issues"
+    "url": "https://github.com/emartech/google-big-query-js/issues"
   },
   "pre-commit": [
     "code-style",
     "validate-commit-msg"
   ],
-  "homepage": "https://github.com/emartech/big-query-js",
+  "homepage": "https://github.com/emartech/google-big-query-js",
   "peerDependencies": {
     "config": "^1.26.2",
     "google-cloud": "^0.56.0"
