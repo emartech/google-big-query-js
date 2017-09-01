@@ -1,7 +1,7 @@
 {
   "name": "@emartech/big-query",
   "description": "Helper library to easily use Google BigQuery in NodeJS",
-  "main": "src/index.js",
+  "main": "src/big-query/index.js",
   "scripts": {
     "test": "mocha test-setup.spec.js src --recursive",
     "code-style": "eslint src/",

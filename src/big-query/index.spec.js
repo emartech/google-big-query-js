@@ -1,17 +1,11 @@
 'use strict';
 
 const BigQuery = require('./');
-const config = require('config');
 const GoogleCloud = require('google-cloud');
 const GoogleBigQuery = GoogleCloud.bigquery;
 const GoogleBigQueryDataset = GoogleBigQuery.Dataset;
 
 describe('BigQuery', function() {
-
-  before(function() {
-    config.util.setModuleDefaults('GoogleCloud', { projectId: 'main_project', dataset: 'main_dataset' });
-  });
-
 
   beforeEach(function() {
     this.sandbox.stub(GoogleCloud, 'bigquery').returns(new GoogleBigQuery({}));
