@@ -1,6 +1,5 @@
 {
   "name": "@emartech/big-query",
-  "version": "1.0.0",
   "description": "Helper library to easily use Google BigQuery in NodeJS",
   "main": "src/index.js",
   "scripts": {
