@@ -63,81 +63,104 @@ describe('FileToTable', function() {
     let apiResponse;
     let jobMetadata;
 
+    const setStubs = () => {
+      apiResponse = { status: { state: 'IN_PROGRESS' } };
+      jobMetadata = { status: { state: 'DONE' } };
+      tableStub.import.resolves([job, apiResponse]);
+      setTimeout(() => job.emit('complete', jobMetadata));
+    };
+
     context('when FileToTable created with table name', function() {
+      context('when source format should be CSV', function() {
+        beforeEach(function() {
+          setStubs();
+        });
 
-      beforeEach(function*() {
-        apiResponse = { status: { state: 'IN_PROGRESS' } };
-        jobMetadata = { status: { state: 'DONE' } };
-        tableStub.import.resolves([job, apiResponse]);
-        setTimeout(() => job.emit('complete', jobMetadata));
+        it('should send \'CSV\' as source format', function*() {
+          yield FileToTable.create(file, table.name, table.schema, {
+            sourceFormat: 'CSV'
+          }).run();
 
-        result = yield FileToTable.create(file, table.name, table.schema).run();
-      });
-
-
-      it('should pass the proper query object', function() {
-        expect(tableStub.import).to.calledWithExactly('[file]', {
-          schema: { fields: ['schema'] },
-          sourceFormat: 'NEWLINE_DELIMITED_JSON',
-          writeDisposition: 'WRITE_TRUNCATE'
+          expect(tableStub.import).to.calledWithExactly('[file]', {
+            schema: { fields: ['schema'] },
+            sourceFormat: 'CSV',
+            writeDisposition: 'WRITE_TRUNCATE'
+          });
         });
       });
 
 
-      it('should propagate error if starting the import job fails', function*() {
-        tableStub.import.rejects(new Error('import creation failed'));
+      context('when source format should be json', function() {
 
-        try {
-          yield FileToTable.create().run();
-        } catch (e) {
-          expect(e.message).to.eql('import creation failed');
-          return;
-        }
-
-        throw new Error('should propagate error');
-      });
+        beforeEach(function* () {
+          setStubs();
+          result = yield FileToTable.create(file, table.name, table.schema).run();
+        });
 
 
-      it("should return with the query job's result", function() {
-        expect(result).to.eql({ status: { state: 'DONE' } });
-      });
+        it('should pass the proper query object', function() {
+          expect(tableStub.import).to.calledWithExactly('[file]', {
+            schema: { fields: ['schema'] },
+            sourceFormat: 'NEWLINE_DELIMITED_JSON',
+            writeDisposition: 'WRITE_TRUNCATE'
+          });
+        });
 
 
-      it('should propagate error of the import job', function*() {
-        try {
-          setTimeout(() => job.emit('error', new Error('import job failed')));
-          yield FileToTable.create().run();
-        } catch (e) {
-          expect(e.message).to.eql('import job failed');
-          return;
-        }
+        it('should propagate error if starting the import job fails', function*() {
+          tableStub.import.rejects(new Error('import creation failed'));
 
-        throw new Error('should propagate error');
-      });
+          try {
+            yield FileToTable.create().run();
+          } catch (e) {
+            expect(e.message).to.eql('import creation failed');
+            return;
+          }
+
+          throw new Error('should propagate error');
+        });
 
 
-      it('should throw error if the query contains errors', function*() {
-        apiResponse.status.errorResult = {
-          reason: 'invalid',
-          location: 'quantile_limits',
-          message: 'Table name cannot be resolved: dataset name is missing.'
-        };
+        it("should return with the query job's result", function() {
+          expect(result).to.eql({ status: { state: 'DONE' } });
+        });
 
-        try {
-          setTimeout(() => job.emit('complete', jobMetadata));
-          yield FileToTable.create().run();
-        } catch (error) {
-          expect(error.message).to.eql(JSON.stringify({
+
+        it('should propagate error of the import job', function*() {
+          try {
+            setTimeout(() => job.emit('error', new Error('import job failed')));
+            yield FileToTable.create().run();
+          } catch (e) {
+            expect(e.message).to.eql('import job failed');
+            return;
+          }
+
+          throw new Error('should propagate error');
+        });
+
+
+        it('should throw error if the query contains errors', function*() {
+          apiResponse.status.errorResult = {
             reason: 'invalid',
             location: 'quantile_limits',
             message: 'Table name cannot be resolved: dataset name is missing.'
-          }));
-          return;
-        }
+          };
 
-        throw new Error('should propagate error');
+          try {
+            setTimeout(() => job.emit('complete', jobMetadata));
+            yield FileToTable.create().run();
+          } catch (error) {
+            expect(error.message).to.eql(JSON.stringify({
+              reason: 'invalid',
+              location: 'quantile_limits',
+              message: 'Table name cannot be resolved: dataset name is missing.'
+            }));
+            return;
+          }
+
+          throw new Error('should propagate error');
+        });
       });
-
     });
 
 

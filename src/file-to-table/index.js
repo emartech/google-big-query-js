@@ -3,25 +3,29 @@
 const BigQuery = require('../big-query');
 const JobRunner = require('../job-runner');
 
+const defaultOptions = {
+  sourceFormat: 'NEWLINE_DELIMITED_JSON'
+};
 
 class FileToTable {
 
-  static create(file, tableName, schema) {
+  static create(file, tableName, schema, options = defaultOptions) {
     const table = BigQuery.create().table(tableName);
 
-    return new FileToTable(file, table, schema);
+    return new FileToTable(file, table, schema, options);
   }
 
 
-  static createWith(file, table, schema) {
-    return new FileToTable(file, table, schema);
+  static createWith(file, table, schema, options = defaultOptions) {
+    return new FileToTable(file, table, schema, options);
   }
 
 
-  constructor(file, table, schema) {
+  constructor(file, table, schema, options) {
     this._file = file;
     this._table = table;
     this._schema = schema;
+    this._options = options;
   }
 
 
@@ -33,7 +37,7 @@ class FileToTable {
   get _metadata() {
     return {
       schema: this._schema,
-      sourceFormat: 'NEWLINE_DELIMITED_JSON',
+      sourceFormat: this._options.sourceFormat,
       writeDisposition: 'WRITE_TRUNCATE'
     };
   }
