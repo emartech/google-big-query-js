@@ -94,7 +94,9 @@ describe('FileToTable', function() {
 
         beforeEach(function* () {
           setStubs();
-          result = yield FileToTable.create(file, table.name, table.schema).run();
+          const options = { other_options: 'other' };
+
+          result = yield FileToTable.create(file, table.name, table.schema, options).run();
         });
 
 
@@ -187,8 +189,8 @@ describe('FileToTable', function() {
       context('when source format should be json', function() {
         beforeEach(function* () {
           setStubs();
-
-          result = yield FileToTable.createWith(file, tableStub, table.schema).run();
+          const options = { other_options: 'other' };
+          result = yield FileToTable.createWith(file, tableStub, table.schema, options).run();
         });
 
 
