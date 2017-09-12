@@ -26,7 +26,12 @@ describe('QueryToTable', function() {
 
 
     it('should instantiate a BigQuery client', function() {
-      expect(BigQuery.create).to.calledWithExactly();
+      expect(BigQuery.create).to.calledWithExactly(undefined);
+    });
+
+    it('should instantiate a BigQuery client with the given dataset', function() {
+      instance = QueryToTable.create('test_table_name', 'test_dataset');
+      expect(BigQuery.create).to.calledWithExactly('test_dataset');
     });
 
   });

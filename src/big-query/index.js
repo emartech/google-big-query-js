@@ -7,10 +7,10 @@ const config = require('config');
 
 class BigQuery {
 
-  static create(datasetName) {
+  static create(datasetName = config.get('GoogleCloud.dataset')) {
     const client = GoogleCloud.bigquery(config.get('GoogleCloud'));
 
-    return new BigQuery(datasetName || config.get('GoogleCloud.dataset'), client);
+    return new BigQuery(datasetName, client);
   };
 
 

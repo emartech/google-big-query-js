@@ -7,8 +7,8 @@ const JobRunner = require('../job-runner');
 
 class QueryToTable {
 
-  static create(tableName) {
-    return new QueryToTable(BigQuery.create(), tableName);
+  static create(tableName, dataset) {
+    return new QueryToTable(BigQuery.create(dataset), tableName);
   }
 
 
