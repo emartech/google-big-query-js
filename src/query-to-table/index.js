@@ -8,15 +8,15 @@ const JobRunner = require('../job-runner');
 class QueryToTable {
 
   static create(tableName, dataset) {
-    return new QueryToTable(BigQuery.create(dataset), tableName);
+    return new QueryToTable(BigQuery.create(dataset), tableName, dataset);
   }
 
 
-  constructor(client, tableName) {
+  constructor(client, tableName, dataset = config.get('GoogleCloud.dataset')) {
     this._client = client;
     this._destinationTable = {
       projectId: config.get('GoogleCloud.projectId'),
-      datasetId: config.get('GoogleCloud.dataset'),
+      datasetId: dataset,
       tableId: tableName
     };
   }
