@@ -9,12 +9,7 @@
     "test": "mocha test-setup.spec.js src --recursive",
     "code-style": "eslint src/",
     "validate-commit-msg": "validate-commit-msg",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
-  },
-  "release": {
-    "verifyConditions": {
-      "path": "./node_modules/semantic-release/src/lib/plugin-noop.js"
-    }
+    "semantic-release": "semantic-release"
   },
   "repository": {
     "type": "git",
