@@ -17,7 +17,7 @@
     "url": "https://github.com/emartech/google-big-query-js.git"
   },
   "author": "Emarsys",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/emartech/google-big-query-js/issues"
   },
