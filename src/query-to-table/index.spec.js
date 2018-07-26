@@ -47,7 +47,7 @@ describe('QueryToTable', function() {
       jobMetadata.status = { state: 'DONE' };
       apiResponse.status = { state: 'IN_PROGRESS' };
 
-      this.sandbox.stub(BigQuery.prototype, 'startQuery').resolves([job, apiResponse]);
+      this.sandbox.stub(BigQuery.prototype, 'createQueryJob').resolves([job, apiResponse]);
     });
 
 
@@ -61,7 +61,7 @@ describe('QueryToTable', function() {
 
 
       it('should pass the proper query object', function() {
-        expect(BigQuery.prototype.startQuery).to.calledWithExactly({
+        expect(BigQuery.prototype.createQueryJob).to.calledWithExactly({
           query: 'sql-query-to-run',
           useLegacySql: false,
           destinationTable: {
@@ -76,12 +76,12 @@ describe('QueryToTable', function() {
 
 
       it('should propagate error if starting the query job fails', function*() {
-        BigQuery.prototype.startQuery.rejects(new Error('error in startQuery'));
+        BigQuery.prototype.createQueryJob.rejects(new Error('error in createQueryJob'));
 
         try {
           yield QueryToTable.create().run();
         } catch (e) {
-          expect(e.message).to.eql('error in startQuery');
+          expect(e.message).to.eql('error in createQueryJob');
           return;
         }
 
@@ -158,7 +158,7 @@ describe('QueryToTable', function() {
             newField: 'new value'
           });
 
-        const passedParameters = BigQuery.prototype.startQuery.firstCall.args[0];
+        const passedParameters = BigQuery.prototype.createQueryJob.firstCall.args[0];
         expect(passedParameters).to.containSubset({
           useLegacySql: 'overwritten',
           newField: 'new value'

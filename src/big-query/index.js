@@ -2,13 +2,13 @@
 
 process.env.SUPPRESS_NO_CONFIG_WARNING = 'y';
 
-const GoogleCloud = require('google-cloud');
+const BigQueryClient = require('@google-cloud/bigquery');
 const config = require('config');
 
 class BigQuery {
 
   static create(datasetName = config.get('GoogleCloud.dataset')) {
-    const client = GoogleCloud.bigquery(config.get('GoogleCloud'));
+    const client = new BigQueryClient(config.get('GoogleCloud'));
 
     return new BigQuery(datasetName, client);
   };
@@ -40,8 +40,8 @@ class BigQuery {
   }
 
 
-  *startQuery(query) {
-    return yield this._client.startQuery(query);
+  *createQueryJob(query) {
+    return yield this._client.createQueryJob(query);
   }
 
 

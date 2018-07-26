@@ -23,7 +23,7 @@ class QueryToTable {
 
 
   *run(query, params = {}) {
-    return yield JobRunner.run(this._client.startQuery(this._getOptions(query, params)));
+    return yield JobRunner.run(this._client.createQueryJob(this._getOptions(query, params)));
   }
 
 

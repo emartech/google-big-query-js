@@ -1,43 +1,15 @@
 'use strict';
 
 const BigQuery = require('./');
-const GoogleCloud = require('google-cloud');
-const GoogleBigQuery = GoogleCloud.bigquery;
-const GoogleBigQueryDataset = GoogleBigQuery.Dataset;
+const GoogleCloudBigQueryClient = require('@google-cloud/bigquery');
+const GoogleCloudBigQueryDataset = GoogleCloudBigQueryClient.Dataset;
 
 describe('BigQuery', function() {
-
-  beforeEach(function() {
-    this.sandbox.stub(GoogleCloud, 'bigquery').returns(new GoogleBigQuery({}));
-  });
-
 
   describe('.create', function() {
 
     it('should return with an instance', function() {
       expect(BigQuery.create()).to.be.an.instanceOf(BigQuery);
-    });
-
-
-    it('should setup a big query client', function() {
-      BigQuery.create();
-
-      expect(GoogleCloud.bigquery).to.calledWithExactly({
-        projectId: 'main_project',
-        dataset: 'main_dataset',
-        maximumBillingTier: 100
-      });
-    });
-
-
-    it('should setup a big query client (passing the proper config untouched, even a dataset was provided', function() {
-      BigQuery.create('some_other_dataset');
-
-      expect(GoogleCloud.bigquery).to.calledWithExactly({
-        projectId: 'main_project',
-        dataset: 'main_dataset',
-        maximumBillingTier: 100
-      });
     });
 
   });
@@ -47,12 +19,11 @@ describe('BigQuery', function() {
     let result;
 
     beforeEach(function() {
-      this.sandbox.stub(GoogleBigQuery.prototype, 'query').resolves(['[array of object]']);
-      this.sandbox.stub(GoogleBigQuery.prototype, 'startQuery').resolves(['[Job]']);
-      this.sandbox.stub(GoogleBigQuery.prototype, 'createQueryStream').returns('[readable stream]');
-      this.sandbox.spy(GoogleBigQuery.prototype, 'dataset');
-      this.sandbox.stub(GoogleBigQueryDataset.prototype, 'table').returns('[Table]');
-
+      this.sandbox.stub(GoogleCloudBigQueryClient.prototype, 'query').resolves(['[array of object]']);
+      this.sandbox.stub(GoogleCloudBigQueryClient.prototype, 'createQueryJob').resolves(['[Job]']);
+      this.sandbox.stub(GoogleCloudBigQueryClient.prototype, 'createQueryStream').returns('[readable stream]');
+      this.sandbox.spy(GoogleCloudBigQueryClient.prototype, 'dataset');
+      this.sandbox.stub(GoogleCloudBigQueryDataset.prototype, 'table').returns('[Table]');
     });
 
 
@@ -64,7 +35,7 @@ describe('BigQuery', function() {
 
 
       it("should call BigQuery's createQueryStream", function() {
-        expect(GoogleBigQuery.prototype.createQueryStream).to.calledWithExactly('[sql or object]');
+        expect(GoogleCloudBigQueryClient.prototype.createQueryStream).to.calledWithExactly('[sql or object]');
       });
 
 
@@ -74,7 +45,7 @@ describe('BigQuery', function() {
 
 
       it('should propagate error', function*() {
-        GoogleBigQuery.prototype.createQueryStream.throws(new Error('Boom!'));
+        GoogleCloudBigQueryClient.prototype.createQueryStream.throws(new Error('Boom!'));
 
         try {
           yield BigQuery.create('miss_march').createQueryStream('SELECT 1');
@@ -97,7 +68,7 @@ describe('BigQuery', function() {
 
 
       it('should pass the query to the original query function on the client', function() {
-        expect(GoogleBigQuery.prototype.query).to.calledWithExactly('SELECT 1');
+        expect(GoogleCloudBigQueryClient.prototype.query).to.calledWithExactly('SELECT 1');
       });
 
 
@@ -107,7 +78,7 @@ describe('BigQuery', function() {
 
 
       it('should propagate error', function*() {
-        GoogleBigQuery.prototype.query.rejects(new Error('Boom!'));
+        GoogleCloudBigQueryClient.prototype.query.rejects(new Error('Boom!'));
 
         try {
           yield BigQuery.create().query('SELECT 1');
@@ -121,15 +92,15 @@ describe('BigQuery', function() {
     });
 
 
-    describe('#startQuery', function() {
+    describe('#createQueryJob', function() {
 
       beforeEach(function*() {
-        result = yield BigQuery.create().startQuery('SELECT 1');
+        result = yield BigQuery.create().createQueryJob('SELECT 1');
       });
 
 
       it('should pass the query to the original statQuery of the client', function() {
-        expect(GoogleBigQuery.prototype.startQuery).to.calledWithExactly('SELECT 1');
+        expect(GoogleCloudBigQueryClient.prototype.createQueryJob).to.calledWithExactly('SELECT 1');
       });
 
 
@@ -139,10 +110,10 @@ describe('BigQuery', function() {
 
 
       it('should propagate error', function*() {
-        GoogleBigQuery.prototype.startQuery.rejects(new Error('Boom!'));
+        GoogleCloudBigQueryClient.prototype.createQueryJob.rejects(new Error('Boom!'));
 
         try {
-          yield BigQuery.create().startQuery('SELECT 1');
+          yield BigQuery.create().createQueryJob('SELECT 1');
         } catch (error) {
           expect(error.message).to.eql('Boom!');
           return;
@@ -158,19 +129,19 @@ describe('BigQuery', function() {
       it('should instantiate dataset with the name passed in for .create', function() {
         BigQuery.create('miss_march').dataset;
 
-        expect(GoogleBigQuery.prototype.dataset).to.calledWithExactly('miss_march');
+        expect(GoogleCloudBigQueryClient.prototype.dataset).to.calledWithExactly('miss_march');
       });
 
 
       it('should use the dataset from the config if none was passed in', function() {
         BigQuery.create().dataset;
 
-        expect(GoogleBigQuery.prototype.dataset).to.calledWithExactly('main_dataset');
+        expect(GoogleCloudBigQueryClient.prototype.dataset).to.calledWithExactly('main_dataset');
       });
 
 
       it('should return with the dataset instance', function() {
-        expect(BigQuery.create().dataset).to.be.an.instanceOf(GoogleBigQueryDataset);
+        expect(BigQuery.create().dataset).to.be.an.instanceOf(GoogleCloudBigQueryDataset);
       });
 
     });
@@ -183,18 +154,18 @@ describe('BigQuery', function() {
 
 
       it('should use the dataset passed in at initialization', function() {
-        expect(GoogleBigQuery.prototype.dataset).to.calledWithExactly('miss_march');
+        expect(GoogleCloudBigQueryClient.prototype.dataset).to.calledWithExactly('miss_march');
       });
 
 
       it('should get table from the dataset', function() {
-        expect(GoogleBigQueryDataset.prototype.table).to.calledWithExactly('horsedick_dot_mpeg');
+        expect(GoogleCloudBigQueryDataset.prototype.table).to.calledWithExactly('horsedick_dot_mpeg');
       });
 
 
       it('should propagate error from dataset', function() {
-        GoogleBigQuery.prototype.dataset.restore();
-        this.sandbox.stub(GoogleBigQuery.prototype, 'dataset').throws(new Error('Boom!'));
+        GoogleCloudBigQueryClient.prototype.dataset.restore();
+        this.sandbox.stub(GoogleCloudBigQueryClient.prototype, 'dataset').throws(new Error('Boom!'));
 
         try {
           result = BigQuery.create('miss_march').table('horsedick_dot_mpeg');
@@ -208,7 +179,7 @@ describe('BigQuery', function() {
 
 
       it('should propagate error from dataset', function() {
-        GoogleBigQueryDataset.prototype.table.throws(new Error('Boom!'));
+        GoogleCloudBigQueryDataset.prototype.table.throws(new Error('Boom!'));
 
         try {
           result = BigQuery.create('miss_march').table('horsedick_dot_mpeg');
@@ -228,7 +199,7 @@ describe('BigQuery', function() {
       let schema = '[schema of table to create]';
 
       beforeEach(function() {
-        GoogleBigQueryDataset.prototype.table.restore();
+        GoogleCloudBigQueryDataset.prototype.table.restore();
         table = BigQuery.create('miss_march').table('horsedick_dot_mpeg');
 
         this.sandbox.stub(table, 'exists').resolves([true]);
@@ -291,7 +262,7 @@ describe('BigQuery', function() {
       let table;
 
       beforeEach(function() {
-        GoogleBigQueryDataset.prototype.table.restore();
+        GoogleCloudBigQueryDataset.prototype.table.restore();
         table = BigQuery.create('miss_march').table('horsedick_dot_mpeg');
 
         this.sandbox.stub(table, 'exists');
@@ -365,15 +336,15 @@ describe('BigQuery', function() {
           createTable: this.sandbox.stub().resolves(['[TABLE]', '[RESPONSE]'])
         };
 
-        GoogleBigQuery.prototype.dataset.restore();
-        this.sandbox.stub(GoogleBigQuery.prototype, 'dataset').returns(dataset);
+        GoogleCloudBigQueryClient.prototype.dataset.restore();
+        this.sandbox.stub(GoogleCloudBigQueryClient.prototype, 'dataset').returns(dataset);
 
         result = yield BigQuery.create().createTable(tableName, options);
       });
 
 
       it('should use the dataset from the config', function() {
-        expect(GoogleBigQuery.prototype.dataset).to.calledWithExactly('main_dataset');
+        expect(GoogleCloudBigQueryClient.prototype.dataset).to.calledWithExactly('main_dataset');
       });
 
 
