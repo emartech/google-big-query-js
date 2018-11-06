@@ -27,7 +27,7 @@
   ],
   "homepage": "https://github.com/emartech/google-big-query-js",
   "peerDependencies": {
-    "config": "^1.31.0",
+    "config": ">=1.0.0",
     "@google-cloud/bigquery": "^2.0.1"
   },
   "devDependencies": {
