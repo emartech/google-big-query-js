@@ -1,8 +1,7 @@
 'use strict';
 
+const config = require('config');
 const BigQuery = require('./');
-const GoogleCloudBigQueryClient = require('@google-cloud/bigquery');
-const GoogleCloudBigQueryDataset = GoogleCloudBigQueryClient.Dataset;
 
 describe('BigQuery', function() {
 
@@ -17,25 +16,44 @@ describe('BigQuery', function() {
 
   describe('instance', function() {
     let result;
+    let client;
+    let dataset;
+    let tableStub;
+
+    let createBigQueryInstance = function(datasetName = config.get('GoogleCloud.dataset')) {
+      tableStub = {
+        exists: this.sandbox.stub(),
+        create: this.sandbox.stub().resolves(),
+        delete: this.sandbox.stub().resolves()
+
+      };
+      dataset = {
+        table: this.sandbox.stub().returns(tableStub),
+        createTable: this.sandbox.stub()
+      };
+      client = {
+        query: this.sandbox.stub().resolves(['[array of object]']),
+        createQueryJob: this.sandbox.stub().resolves(['[Job]']),
+        createQueryStream: this.sandbox.stub().returns('[readable stream]'),
+        dataset: this.sandbox.stub().returns(dataset)
+      };
+      return new BigQuery(datasetName, client);
+    };
 
     beforeEach(function() {
-      this.sandbox.stub(GoogleCloudBigQueryClient.prototype, 'query').resolves(['[array of object]']);
-      this.sandbox.stub(GoogleCloudBigQueryClient.prototype, 'createQueryJob').resolves(['[Job]']);
-      this.sandbox.stub(GoogleCloudBigQueryClient.prototype, 'createQueryStream').returns('[readable stream]');
-      this.sandbox.spy(GoogleCloudBigQueryClient.prototype, 'dataset');
-      this.sandbox.stub(GoogleCloudBigQueryDataset.prototype, 'table').returns('[Table]');
+      createBigQueryInstance = createBigQueryInstance.bind(this);
     });
 
 
     describe('#createQueryStream', function() {
 
       beforeEach(function() {
-        result = BigQuery.create().createQueryStream('[sql or object]');
+        result = createBigQueryInstance().createQueryStream('[sql or object]');
       });
 
 
       it("should call BigQuery's createQueryStream", function() {
-        expect(GoogleCloudBigQueryClient.prototype.createQueryStream).to.calledWithExactly('[sql or object]');
+        expect(client.createQueryStream).to.calledWithExactly('[sql or object]');
       });
 
 
@@ -45,10 +63,11 @@ describe('BigQuery', function() {
 
 
       it('should propagate error', function*() {
-        GoogleCloudBigQueryClient.prototype.createQueryStream.throws(new Error('Boom!'));
+        const instance = createBigQueryInstance('another_dataset_name');
+        client.createQueryStream.throws(new Error('Boom!'));
 
         try {
-          yield BigQuery.create('miss_march').createQueryStream('SELECT 1');
+          instance.createQueryStream('SELECT 1');
         } catch (error) {
           expect(error.message).to.eql('Boom!');
           return;
@@ -63,12 +82,12 @@ describe('BigQuery', function() {
     describe('#query', function() {
 
       beforeEach(function*() {
-        result = yield BigQuery.create().query('SELECT 1');
+        result = yield createBigQueryInstance().query('SELECT 1');
       });
 
 
       it('should pass the query to the original query function on the client', function() {
-        expect(GoogleCloudBigQueryClient.prototype.query).to.calledWithExactly('SELECT 1');
+        expect(client.query).to.calledWithExactly('SELECT 1');
       });
 
 
@@ -78,10 +97,11 @@ describe('BigQuery', function() {
 
 
       it('should propagate error', function*() {
-        GoogleCloudBigQueryClient.prototype.query.rejects(new Error('Boom!'));
+        const instance = createBigQueryInstance();
+        client.query.rejects(new Error('Boom!'));
 
         try {
-          yield BigQuery.create().query('SELECT 1');
+          yield instance.query('SELECT 1');
         } catch (error) {
           expect(error.message).to.eql('Boom!');
           return;
@@ -95,12 +115,12 @@ describe('BigQuery', function() {
     describe('#createQueryJob', function() {
 
       beforeEach(function*() {
-        result = yield BigQuery.create().createQueryJob('SELECT 1');
+        result = yield createBigQueryInstance().createQueryJob('SELECT 1');
       });
 
 
       it('should pass the query to the original statQuery of the client', function() {
-        expect(GoogleCloudBigQueryClient.prototype.createQueryJob).to.calledWithExactly('SELECT 1');
+        expect(client.createQueryJob).to.calledWithExactly('SELECT 1');
       });
 
 
@@ -110,10 +130,11 @@ describe('BigQuery', function() {
 
 
       it('should propagate error', function*() {
-        GoogleCloudBigQueryClient.prototype.createQueryJob.rejects(new Error('Boom!'));
+        const instance = createBigQueryInstance();
+        client.createQueryJob.rejects(new Error('Boom!'));
 
         try {
-          yield BigQuery.create().createQueryJob('SELECT 1');
+          yield instance.createQueryJob('SELECT 1');
         } catch (error) {
           expect(error.message).to.eql('Boom!');
           return;
@@ -127,21 +148,21 @@ describe('BigQuery', function() {
     describe('#dataset (getter)', function() {
 
       it('should instantiate dataset with the name passed in for .create', function() {
-        BigQuery.create('miss_march').dataset;
+        createBigQueryInstance('another_dataset_name').dataset;
 
-        expect(GoogleCloudBigQueryClient.prototype.dataset).to.calledWithExactly('miss_march');
+        expect(client.dataset).to.calledWithExactly('another_dataset_name');
       });
 
 
       it('should use the dataset from the config if none was passed in', function() {
-        BigQuery.create().dataset;
+        createBigQueryInstance().dataset;
 
-        expect(GoogleCloudBigQueryClient.prototype.dataset).to.calledWithExactly('main_dataset');
+        expect(client.dataset).to.calledWithExactly('main_dataset');
       });
 
 
       it('should return with the dataset instance', function() {
-        expect(BigQuery.create().dataset).to.be.an.instanceOf(GoogleCloudBigQueryDataset);
+        expect(createBigQueryInstance().dataset).to.be.eql(dataset);
       });
 
     });
@@ -149,26 +170,26 @@ describe('BigQuery', function() {
 
     describe('#table', function() {
       beforeEach(function() {
-        result = BigQuery.create('miss_march').table('horsedick_dot_mpeg');
+        result = createBigQueryInstance('another_dataset_name').table('a_table_name');
       });
 
 
       it('should use the dataset passed in at initialization', function() {
-        expect(GoogleCloudBigQueryClient.prototype.dataset).to.calledWithExactly('miss_march');
+        expect(client.dataset).to.calledWithExactly('another_dataset_name');
       });
 
 
       it('should get table from the dataset', function() {
-        expect(GoogleCloudBigQueryDataset.prototype.table).to.calledWithExactly('horsedick_dot_mpeg');
+        expect(dataset.table).to.calledWithExactly('a_table_name');
       });
 
 
       it('should propagate error from dataset', function() {
-        GoogleCloudBigQueryClient.prototype.dataset.restore();
-        this.sandbox.stub(GoogleCloudBigQueryClient.prototype, 'dataset').throws(new Error('Boom!'));
+        const instance = createBigQueryInstance('another_dataset_name');
+        client.dataset.throws(new Error('Boom!'));
 
         try {
-          result = BigQuery.create('miss_march').table('horsedick_dot_mpeg');
+          result = instance.table('a_table_name');
         } catch (error) {
           expect(error.message).to.eql('Boom!');
           return;
@@ -179,10 +200,11 @@ describe('BigQuery', function() {
 
 
       it('should propagate error from dataset', function() {
-        GoogleCloudBigQueryDataset.prototype.table.throws(new Error('Boom!'));
+        const instance = createBigQueryInstance('another_dataset_name');
+        dataset.table.throws(new Error('Boom!'));
 
         try {
-          result = BigQuery.create('miss_march').table('horsedick_dot_mpeg');
+          result = instance.table('a_table_name');
         } catch (error) {
           expect(error.message).to.eql('Boom!');
           return;
@@ -197,25 +219,24 @@ describe('BigQuery', function() {
     describe('#createTableIfNotExists', function() {
       let table;
       let schema = '[schema of table to create]';
+      let instance;
 
       beforeEach(function() {
-        GoogleCloudBigQueryDataset.prototype.table.restore();
-        table = BigQuery.create('miss_march').table('horsedick_dot_mpeg');
-
-        this.sandbox.stub(table, 'exists').resolves([true]);
-        this.sandbox.stub(table, 'create').resolves();
+        instance = createBigQueryInstance('another_dataset_name');
+        table = instance.table('a_table_name');
       });
 
 
       context('when the table exists', function() {
 
         beforeEach(function*() {
-          yield BigQuery.create('miss_march').createTableIfNotExists(table, schema);
+          tableStub.exists.resolves([true]);
+          yield instance.createTableIfNotExists(table, schema);
         });
 
 
         it("should not create the table if it's already exist", function() {
-          expect(table.create).to.not.called;
+          expect(tableStub.create).to.not.called;
         });
 
       });
@@ -224,14 +245,13 @@ describe('BigQuery', function() {
       context('when the table does not exist', function() {
 
         beforeEach(function*() {
-          table.exists.resolves([false]);
-
-          yield BigQuery.create('miss_march').createTableIfNotExists(table, schema);
+          tableStub.exists.resolves([false]);
+          yield instance.createTableIfNotExists(table, schema);
         });
 
 
         it('should create the table', function*() {
-          expect(table.create).to.calledWithExactly({ schema: '[schema of table to create]' });
+          expect(tableStub.create).to.calledWithExactly({ schema: '[schema of table to create]' });
         });
 
       });
@@ -240,11 +260,11 @@ describe('BigQuery', function() {
       context('when an error occurs', function() {
 
         it('should propagate error from table.create', function*() {
-          table.exists.resolves([false]);
-          table.create.rejects(new Error("can't create table"));
+          tableStub.exists.resolves([false]);
+          tableStub.create.rejects(new Error("can't create table"));
 
           try {
-            yield BigQuery.create('miss_march').createTableIfNotExists(table, schema);
+            yield instance.createTableIfNotExists(table, schema);
           } catch (error) {
             expect(error.message).to.eql("can't create table");
             return;
@@ -259,28 +279,26 @@ describe('BigQuery', function() {
 
 
     describe('#dropTableIfExists', function() {
+      let instance;
       let table;
 
       beforeEach(function() {
-        GoogleCloudBigQueryDataset.prototype.table.restore();
-        table = BigQuery.create('miss_march').table('horsedick_dot_mpeg');
-
-        this.sandbox.stub(table, 'exists');
-        this.sandbox.stub(table, 'delete').resolves();
+        instance = createBigQueryInstance('another_dataset_name');
+        table = instance.table('a_table_name');
       });
 
 
       context('when the table exists', function() {
 
         beforeEach(function*() {
-          table.exists.resolves([true]);
+          tableStub.exists.resolves([true]);
 
-          yield BigQuery.create('miss_march').dropTableIfExists(table);
+          yield instance.dropTableIfExists(table);
         });
 
 
         it('should drop the table if it exists', function() {
-          expect(table.delete).to.called;
+          expect(tableStub.delete).to.called;
         });
 
       });
@@ -289,14 +307,14 @@ describe('BigQuery', function() {
       context('when the table does not exist', function() {
 
         beforeEach(function*() {
-          table.exists.resolves([false]);
+          tableStub.exists.resolves([false]);
 
-          yield BigQuery.create('miss_march').dropTableIfExists(table);
+          yield instance.dropTableIfExists(table);
         });
 
 
         it('should not try to drop the table', function*() {
-          expect(table.delete).not.to.be.called;
+          expect(tableStub.delete).not.to.be.called;
         });
 
       });
@@ -305,11 +323,11 @@ describe('BigQuery', function() {
       context('when an error occurs', function() {
 
         it('should propagate error from table.create', function*() {
-          table.exists.resolves([true]);
-          table.delete.rejects(new Error("can't drop table"));
+          tableStub.exists.resolves([true]);
+          tableStub.delete.rejects(new Error("can't drop table"));
 
           try {
-            yield BigQuery.create('miss_march').dropTableIfExists(table);
+            yield instance.dropTableIfExists(table);
           } catch (error) {
             expect(error.message).to.eql("can't drop table");
             return;
@@ -324,27 +342,17 @@ describe('BigQuery', function() {
 
 
     describe('#createTable', function() {
-      let dataset;
       let result;
-      let options = {
-        id: 123
-      };
-      let tableName = 'myTable';
 
       beforeEach(function*() {
-        dataset = {
-          createTable: this.sandbox.stub().resolves(['[TABLE]', '[RESPONSE]'])
-        };
-
-        GoogleCloudBigQueryClient.prototype.dataset.restore();
-        this.sandbox.stub(GoogleCloudBigQueryClient.prototype, 'dataset').returns(dataset);
-
-        result = yield BigQuery.create().createTable(tableName, options);
+        const instance = createBigQueryInstance();
+        dataset.createTable.resolves(['[TABLE]', '[RESPONSE]']);
+        result = yield instance.createTable('myTable', { id: 123 });
       });
 
 
       it('should use the dataset from the config', function() {
-        expect(GoogleCloudBigQueryClient.prototype.dataset).to.calledWithExactly('main_dataset');
+        expect(client.dataset).to.calledWithExactly('main_dataset');
       });
 
 
@@ -357,7 +365,6 @@ describe('BigQuery', function() {
       });
 
     });
-
 
   });
 

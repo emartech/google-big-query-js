@@ -2,7 +2,7 @@
 
 process.env.SUPPRESS_NO_CONFIG_WARNING = 'y';
 
-const BigQueryClient = require('@google-cloud/bigquery');
+const { BigQuery: BigQueryClient } = require('@google-cloud/bigquery');
 const config = require('config');
 
 class BigQuery {

@@ -1,7 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
-
+const defaultsDeep = require('lodash.defaultsdeep');
 const BigQuery = require('../big-query');
 const JobRunner = require('../job-runner');
 
@@ -12,7 +11,7 @@ const defaultOptions = {
 class FileToTable {
 
   static create(file, tableName, schema, options) {
-    options = _.defaultsDeep(options, defaultOptions);
+    options = defaultsDeep(options, defaultOptions);
     const table = BigQuery.create().table(tableName);
 
     return new FileToTable(file, table, schema, options);
@@ -20,7 +19,7 @@ class FileToTable {
 
 
   static createWith(file, table, schema, options = defaultOptions) {
-    options = _.defaultsDeep(options, defaultOptions);
+    options = defaultsDeep(options, defaultOptions);
 
     return new FileToTable(file, table, schema, options);
   }
