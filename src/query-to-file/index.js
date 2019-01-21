@@ -8,16 +8,16 @@ const BigQuery = require('../big-query');
 
 class QueryToFile {
 
-  static create(baseName, formatOptions = { format: 'JSON', gzip: true }, filename = null) {
+  static create(baseName, format = 'JSON', filename = null) {
     const tableName = `tmp_${baseName}_${+new Date}`;
 
-    return new QueryToFile(tableName, formatOptions, filename);
+    return new QueryToFile(tableName, format, filename);
   }
 
 
-  constructor(tableName, formatOptions = { format: 'JSON', gzip: true }, filename = null) {
+  constructor(tableName, format = 'JSON', filename = null) {
     this._tableName = tableName;
-    this._formatOptions = formatOptions;
+    this._format = format;
     this._fileName = filename || `tmp/${this._tableName}.json.gz`;
   }
 
@@ -26,7 +26,7 @@ class QueryToFile {
     const file = File.create(this._fileName);
 
     yield QueryToTable.create(this._tableName).run(query, options);
-    yield TableToFile.create(this._tableName, file, this._formatOptions).run();
+    yield TableToFile.create(this._tableName, file, this._format).run();
     yield BigQuery.create().table(this._tableName).delete();
 
     return file;
