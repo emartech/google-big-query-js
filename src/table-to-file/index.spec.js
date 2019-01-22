@@ -120,4 +120,27 @@ describe('TableToFile', function() {
 
   });
 
+  describe('#formats', function() {
+    const job = new EventEmitter;
+    let apiResponse;
+    let jobMetadata;
+
+    beforeEach(function* () {
+      apiResponse = { status: { state: 'IN_PROGRESS' } };
+      jobMetadata = { status: { state: 'DONE' } };
+      table.export.resolves([job, apiResponse]);
+      setTimeout(() => job.emit('complete', jobMetadata));
+    });
+
+    it('should pass the proper options to export for CSV', function*() {
+      yield TableToFile.create(tableName, file, 'CSV').run();
+      expect(table.export).to.calledWithExactly('[file]', { format: 'CSV', gzip: false });
+    });
+
+    it('should throw error for unknown file format', function*() {
+      expect(() => TableToFile.create(tableName, file, 'xls')).to.throw();
+    });
+
+  });
+
 });

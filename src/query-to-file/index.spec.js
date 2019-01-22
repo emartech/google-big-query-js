@@ -11,12 +11,14 @@ describe('QueryToFile', function() {
   let clock;
   let table;
   let instance;
+  let format;
 
   beforeEach(function() {
     clock = this.sandbox.useFakeTimers(+new Date('2016-12-08')); //= 1481155200000
     table = { delete: this.sandbox.stub().resolves() };
+    format = 'JSON';
 
-    instance = QueryToFile.create('base_name');
+    instance = QueryToFile.create('base_name', format);
   });
 
 
@@ -71,7 +73,11 @@ describe('QueryToFile', function() {
 
 
     it('instantiates a TableToFile with temp table name and temp file', function() {
-      expect(TableToFile.create).to.calledWithExactly('tmp_base_name_1481155200000', '[temp storage file]');
+      expect(TableToFile.create).to.calledWithExactly(
+        'tmp_base_name_1481155200000',
+        '[temp storage file]',
+        format
+      );
     });
 
 

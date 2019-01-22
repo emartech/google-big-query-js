@@ -204,9 +204,9 @@ This is a wrapper of the original [createTable()](https://cloud.google.com/nodej
 
 ## BigQuery.QueryToFile
 
-#### create(baseName):QueryToFile `static`
+#### create(baseName, format, file):QueryToFile `static`
 
-#### constructor(tableName):QueryToFile
+#### constructor(tableName, format, file):QueryToFile
 
 #### run(query, options):File `generator`
 
@@ -252,9 +252,9 @@ This is a wrapper of the original [createTable()](https://cloud.google.com/nodej
 
 ## BigQuery.TableToFile
 
-#### create(tableName, file):TableToFile `static`
+#### create(tableName, file, format):TableToFile `static`
 
-#### constructor(table, file):TableToFile
+#### constructor(table, file, format):TableToFile
 
 #### run():Job `generator`
 
