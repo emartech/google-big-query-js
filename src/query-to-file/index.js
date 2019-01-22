@@ -17,8 +17,9 @@ class QueryToFile {
 
   constructor(tableName, format = 'JSON', filename = null) {
     this._tableName = tableName;
-    this._format = format;
-    this._fileName = filename || `tmp/${this._tableName}.json.gz`;
+    this._format = format === 'CSV' ? 'CSV' : 'JSON';
+    const extension = this._format === 'CSV' ? '.csv' : '.json.gz';
+    this._fileName = filename || `tmp/${this._tableName}${extension}`;
   }
 
 
