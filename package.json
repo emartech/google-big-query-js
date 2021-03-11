@@ -2,8 +2,7 @@
   "name": "@emartech/google-big-query",
   "description": "Helper library to easily use Google BigQuery in NodeJS",
   "engines": {
-    "node": "10.13.0",
-    "npm": "6.4.1"
+    "node": "14"
   },
   "main": "src/index.js",
   "scripts": {
@@ -27,35 +26,35 @@
   ],
   "homepage": "https://github.com/emartech/google-big-query-js",
   "peerDependencies": {
-    "config": ">=1.0.0",
-    "@google-cloud/bigquery": "^2.0.1"
+    "@google-cloud/bigquery": "^5.5.0",
+    "config": ">=3.3.6"
   },
   "devDependencies": {
-    "chai": "4.2.0",
+    "@google-cloud/bigquery": "5.5.0",
+    "chai": "4.3.3",
     "chai-subset": "1.6.0",
     "co-mocha": "1.2.2",
-    "config": "2.0.1",
-    "eslint": "5.8.0",
+    "config": "3.3.6",
+    "eslint": "7.21.0",
     "eslint-config-emarsys": "5.1.0",
-    "eslint-plugin-no-only-tests": "2.0.1",
+    "eslint-plugin-no-only-tests": "2.4.0",
     "eslint-plugin-require-path-exists": "1.1.9",
     "eslint-plugin-security": "1.4.0",
     "from2": "2.3.0",
     "from2-array": "0.0.4",
     "from2-string": "1.1.0",
-    "@google-cloud/bigquery": "2.0.1",
-    "mocha": "5.2.0",
+    "mocha": "8.3.1",
     "pre-commit": "1.2.2",
-    "sinon": "7.1.1",
-    "sinon-chai": "3.2.0",
+    "semantic-release": "17.4.1",
+    "sinon": "9.2.4",
+    "sinon-chai": "3.5.0",
     "stream-to-array": "2.3.0",
-    "validate-commit-message": "3.0.1",
-    "semantic-release": "15.10.7"
+    "validate-commit-message": "3.0.1"
   },
   "dependencies": {
-    "@emartech/google-cloud-storage": "1.1.6",
-    "lodash.defaultsdeep": "4.6.0",
-    "pumpify": "1.5.1",
+    "@emartech/google-cloud-storage": "^2.0.0",
+    "lodash.defaultsdeep": "4.6.1",
+    "pumpify": "2.0.1",
     "split": "1.0.1"
   },
   "version": "1.4.1"
